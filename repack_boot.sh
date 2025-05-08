@@ -210,7 +210,10 @@ case ${TARGET} in
 		initrd_filename="initramfs.platform.cpio.gz"
 		cp -a modules_dir/usr/lib/modules/* dlkm-root/usr/lib/modules/
 		( cd dlkm-root && find . | cpio -o -H newc | gzip -9 ) > initramfs.dlkm.cpio.gz
-		cmdline="console=ttySAC0,3000000n8 clk_ignore_unused root=PARTLABEL=userdata rw rootwait debug no_console_suspend earlycon"
+		#cmdline="console=ttySAC0,3000000n8 clk_ignore_unused root=PARTLABEL=userdata rw rootwait debug no_console_suspend earlycon"
+		console_cmdline="console=tty0 console=ttyMSM0,115200n8 earlycon"
+		cmdline_extra="clk_ignore_unused pd_ignore_unused"
+		cmdline="root=PARTLABEL=userdata rw rootwait debug ${console_cmdline} ${cmdline_extra}"
 		vendor_bootconfig=vendor-bootconfig.img
 		vendor_boot_out=${vendor_boot_out:-vendor_boot.img}
 		boot_out=${boot_out:-boot.img}
