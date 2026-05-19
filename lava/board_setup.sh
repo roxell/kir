@@ -27,6 +27,19 @@ if [[ -n ${local_cpio} ]]; then
 	tar -cf rootfs.tar -C rootfs.d .
 	rm -rf rootfs.d
 fi
+for img in $(find . -type f -name "*${ROOTFS_STRING}*.ext4"); do
+	if ! file "${img}" | grep -q "DOS/MBR"; then
+		continue
+	fi
+	echo "PRINTOUT stripping MBR from disk image: ${img}"
+	read part_nr start sectors < <(partx -g -o NR,START,SECTORS "${img}" | head -1)
+	if [[ -z ${start} ]] || [[ ${sectors} -eq 0 ]]; then
+		echo "ABORT: could not read partition table in ${img}"
+		exit 1
+	fi
+	dd if="${img}" of="${img}.fs" bs=512 skip="${start}" count="${sectors}" status=none
+	mv "${img}.fs" "${img}"
+done
 local_rootfs=$(find . -type f -name "*${ROOTFS_STRING}*.ext4*")||true
 if [[ -z ${local_rootfs} ]]; then
 	local_rootfs=$(find . -type f -name "*${ROOTFS_STRING}*.tar*")
